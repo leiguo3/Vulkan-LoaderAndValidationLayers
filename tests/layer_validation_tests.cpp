@@ -11348,7 +11348,6 @@ TEST_F(VkLayerTest, InUseDestroyedSignaled) {
     ASSERT_NO_FATAL_FAILURE(InitState());
     ASSERT_NO_FATAL_FAILURE(InitRenderTarget());
 
-    const char *submit_with_deleted_event_message = "Cannot submit cmd buffer using deleted event 0x";
     const char *cannot_destroy_fence_message = "Fence 0x";
 
     m_commandBuffer->BeginCommandBuffer();
@@ -11366,7 +11365,10 @@ TEST_F(VkLayerTest, InUseDestroyedSignaled) {
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submit_info.commandBufferCount = 1;
     submit_info.pCommandBuffers = &m_commandBuffer->handle();
-    m_errorMonitor->SetDesiredFailureMsg(VK_DEBUG_REPORT_ERROR_BIT_EXT, submit_with_deleted_event_message);
+    const char *deleted_event_message[] = {"Cannot submit cmd buffer using deleted event 0x",
+                                           "You are submitting command buffer 0x"};
+    m_errorMonitor->SetDesiredFailureMsg(VK_DEBUG_REPORT_ERROR_BIT_EXT, deleted_event_message[0]);
+    m_errorMonitor->SetDesiredFailureMsg(VK_DEBUG_REPORT_ERROR_BIT_EXT, deleted_event_message[1]);
     vkQueueSubmit(m_device->m_queue, 1, &submit_info, VK_NULL_HANDLE);
     m_errorMonitor->VerifyFound();
 
